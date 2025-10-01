@@ -1,100 +1,217 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>XRP Cream MPC Controller</title>
+  <title>XRP Cream • MPC2000XL Controller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    body {
-      margin: 0; background: #0e3b5a; font-family: system-ui, sans-serif; color: #eee;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+    :root{
+      --mpc-body:#d0cec9;
+      --mpc-panel:#c6c4bf;
+      --mpc-bezel:#6f6f6f;
+      --lcd-bg:#1a2a2e;
+      --lcd-text:#9de06b;
+      --pad:#8d8b88;
+      --label:#2d2d2d;
+      --red:#e24a4a; --blue:#6aa8ff; --green:#7ef2b6; --yellow:#ffe58a; --grey:#dddddd;
     }
-    .mpc {
-      width: min(930px, 95vw); background:#cfcfcf; border-radius: 14px; padding: 18px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      border: 4px solid #777;
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:#0e3b5a; font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color:#111; display:flex; justify-content:center; align-items:center; min-height:100svh; padding:2.5vmin;
     }
-    .top-row { display:flex; align-items:center; gap:18px; }
-    .lcd {
-      flex: 1; background:#1a2a2e; color:#9de06b; font-family: "Courier New", monospace;
-      border-radius: 6px; padding: 14px 16px; font-size: clamp(14px, 2.2vw, 18px);
-      box-shadow: inset 0 0 0 2px #101a1d;
-      min-height: 48px; display:flex; align-items:center; justify-content: space-between;
+    .mpc{
+      width:min(1040px, 96vw);
+      background:var(--mpc-body);
+      border:6px solid var(--mpc-bezel);
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+      padding:18px 18px 22px;
+      position:relative;
     }
-    .brand { font-weight:700; color:#b21e2b; letter-spacing:.5px; }
-    .grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;
+    /* top header */
+    .header{
+      display:flex; align-items:flex-end; gap:18px; margin-bottom:12px;
     }
-    .pad {
-      aspect-ratio: 1/1; border-radius: 10px; display:flex; align-items:center; justify-content:center;
-      font-weight: 700; text-align:center; cursor: pointer; user-select:none; color:#092032;
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.25);
+    .floppy{
+      width:240px; height:86px; background:#2b2b2b; border-radius:6px; position:relative;
+      box-shadow: inset 0 0 0 3px #141414;
+    }
+    .floppy::after{
+      content:""; position:absolute; left:16px; right:16px; top:18px; height:38px; background:#7ab2c1; border-radius:4px;
+      box-shadow: inset 0 0 0 2px #29454d;
+    }
+    .branding{
+      flex:1; display:flex; justify-content:space-between; align-items:flex-end; padding:0 6px;
+    }
+    .akai{font-weight:900; color:#bf1622; letter-spacing:.5px; font-size:22px}
+    .model{font-weight:800; color:#222; font-size:22px}
+    .subtitle{font-size:12px; color:#444}
+
+    .main{
+      display:grid; grid-template-columns: 1.05fr .95fr; gap:18px;
+    }
+
+    /* left control area (fake knobs/buttons) */
+    .left{
+      background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae;
+    }
+    .lcd{
+      background:var(--lcd-bg); color:var(--lcd-text); font-family:"Courier New", ui-monospace, monospace;
+      border-radius:6px; padding:12px 14px; font-size:clamp(14px,2.1vw,18px);
+      display:flex; align-items:center; justify-content:space-between;
+      box-shadow: inset 0 0 0 2px #101a1d, inset 0 -3px 0 rgba(0,0,0,.5);
+      min-height:52px;
+    }
+    .knobs{
+      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px;
+    }
+    .knob{
+      height:64px; background:#2d2d2d; border-radius:50%; position:relative;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.35), 0 6px 10px rgba(0,0,0,.2);
+    }
+    .knob::after{
+      content:""; position:absolute; width:6px; height:14px; background:#c9c9c9; top:8px; left:50%; transform:translateX(-50%);
+      border-radius:2px;
+    }
+    .button-row{
+      display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:12px;
+    }
+    .btn{
+      height:28px; background:#e8e8e8; border-radius:4px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.12);
+    }
+    .faders{ margin-top:14px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
+    .fader{
+      height:82px; background:#bfbfbf; border-radius:6px; box-shadow:inset 0 0 0 2px #a2a2a2; position:relative;
+    }
+    .fader > span{
+      position:absolute; left:50%; transform:translateX(-50%); width:58%; height:18px; top:46%;
+      background:#2c2c2c; border-radius:4px; box-shadow:0 3px 6px rgba(0,0,0,.25);
+    }
+
+    /* right pad grid area */
+    .right{
+      background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae;
+      display:flex; flex-direction:column; gap:12px;
+    }
+    .right-title{
+      display:flex; gap:10px; align-items:center; color:#333; font-weight:700; letter-spacing:.4px;
+    }
+    .grid{
+      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+    }
+    .pad{
+      aspect-ratio:1/1; border-radius:10px; display:flex; align-items:center; justify-content:center;
+      font-weight:800; text-align:center; cursor:pointer; user-select:none; color:#08202d;
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.25), 0 9px 18px rgba(0,0,0,.25);
       transition: transform .05s ease, filter .05s ease;
+      background:var(--pad);
     }
-    .pad:active { transform: translateY(2px); filter: brightness(.95); }
-    /* pad colors */
-    .green{ background:#7ef2b6; } .red{ background:#ff8a8a; }
-    .blue{ background:#7ec8ff; } .yellow{ background:#ffe58a; }
-    .grey{ background:#d8d8d8; }
-    .footer { margin-top:12px; font-size:12px; color:#333; text-align:right;}
+    .pad:active{ transform:translateY(2px); filter:brightness(.95); }
+    .green{ background:var(--green); }
+    .red{ background:var(--red); color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.3);}
+    .blue{ background:var(--blue); }
+    .yellow{ background:var(--yellow); }
+    .grey{ background:var(--grey); }
+
+    .footer{
+      margin-top:10px; font-size:12px; color:#3b3b3b; text-align:right;
+    }
   </style>
 </head>
 <body>
-<div class="mpc">
-  <div class="top-row">
-    <div class="brand">AKAI <span style="color:#333;font-weight:600">MPC2000XL</span> • XRP Cream</div>
-  </div>
-  <div id="lcd" class="lcd">
-    <div>Loading…</div>
-    <div id="lcd-right"></div>
-  </div>
+  <div class="mpc">
+    <div class="header">
+      <div class="floppy"></div>
+      <div class="branding">
+        <div>
+          <div class="akai">AKAI professional</div>
+          <div class="subtitle">MIDI PRODUCTION CENTER</div>
+        </div>
+        <div>
+          <div class="model">MPC2000XL</div>
+        </div>
+      </div>
+    </div>
 
-  <!-- 4×4 pad grid -->
-  <div class="grid" id="pads">
-    <!-- Row 1 -->
-    <div class="pad green"  data-action="buy"  data-percent="25">Buy 25%</div>
-    <div class="pad green"  data-action="buy"  data-percent="50">Buy 50%</div>
-    <div class="pad green"  data-action="buy"  data-percent="75">Buy 75%</div>
-    <div class="pad green"  data-action="buy"  data-percent="100">Buy 100%</div>
-    <!-- Row 2 -->
-    <div class="pad red"    data-action="sell" data-percent="25">Sell 25%</div>
-    <div class="pad red"    data-action="sell" data-percent="50">Sell 50%</div>
-    <div class="pad red"    data-action="sell" data-percent="75">Sell 75%</div>
-    <div class="pad red"    data-action="sell" data-percent="100">Sell 100%</div>
-    <!-- Row 3 -->
-    <div class="pad blue"   data-action="status">Status</div>
-    <div class="pad blue"   data-action="balance">Balances</div>
-    <div class="pad blue"   data-action="open_orders">Open Orders</div>
-    <div class="pad blue"   data-action="last_trade">Last Trade</div>
-    <!-- Row 4 -->
-    <div class="pad yellow" data-action="live_on">Live ON</div>
-    <div class="pad grey"   data-action="live_off">Live OFF</div>
-    <div class="pad yellow" data-action="bank">Bank Profit</div>
-    <div class="pad grey"   data-action="help">Help</div>
-  </div>
+    <div class="main">
+      <!-- LEFT: LCD + faux controls -->
+      <div class="left">
+        <div class="lcd">
+          <div id="lcd-left">Booting XRP Cream…</div>
+          <div id="lcd-right"></div>
+        </div>
 
-  <div class="footer">Pads send actions to the bot; LCD uses KuCoin public ticker.</div>
-</div>
+        <div class="knobs">
+          <div class="knob"></div><div class="knob"></div><div class="knob"></div><div class="knob"></div>
+        </div>
+
+        <div class="button-row">
+          <div class="btn"></div><div class="btn"></div><div class="btn"></div><div class="btn"></div>
+          <div class="btn"></div><div class="btn"></div><div class="btn"></div><div class="btn"></div>
+        </div>
+
+        <div class="faders">
+          <div class="fader"><span></span></div>
+          <div class="fader"><span></span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: 4x4 pads -->
+      <div class="right">
+        <div class="right-title">DRUMS / TRADING PADS</div>
+        <div class="grid">
+          <!-- Row 1 -->
+          <div class="pad green"  data-action="buy"  data-percent="25">Buy 25%</div>
+          <div class="pad green"  data-action="buy"  data-percent="50">Buy 50%</div>
+          <div class="pad green"  data-action="buy"  data-percent="75">Buy 75%</div>
+          <div class="pad green"  data-action="buy"  data-percent="100">Buy 100%</div>
+          <!-- Row 2 -->
+          <div class="pad red"    data-action="sell" data-percent="25">Sell 25%</div>
+          <div class="pad red"    data-action="sell" data-percent="50">Sell 50%</div>
+          <div class="pad red"    data-action="sell" data-percent="75">Sell 75%</div>
+          <div class="pad red"    data-action="sell" data-percent="100">Sell 100%</div>
+          <!-- Row 3 -->
+          <div class="pad blue"   data-action="status">Status</div>
+          <div class="pad blue"   data-action="balance">Balances</div>
+          <div class="pad blue"   data-action="open_orders">Open Orders</div>
+          <div class="pad blue"   data-action="last_trade">Last Trade</div>
+          <!-- Row 4 -->
+          <div class="pad yellow" data-action="live_on">Live ON</div>
+          <div class="pad grey"   data-action="live_off">Live OFF</div>
+          <div class="pad yellow" data-action="bank">Bank Profit</div>
+          <div class="pad grey"   data-action="help">Help</div>
+        </div>
+        <div class="footer">Pads send actions to your bot • LCD shows live XRP/USDT.</div>
+      </div>
+    </div>
+  </div>
 
 <script>
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+  // Enable Telegram WebApp features if opened from /panel
+  const tg = window.Telegram?.WebApp;
+  if (tg) tg.expand();
 
-  // Hook up pad clicks -> sendData to bot
+  // Send pad events to the bot (via WebApp sendData)
   document.querySelectorAll('.pad').forEach(p => {
     p.addEventListener('click', () => {
       const payload = {
         action: p.dataset.action,
         percent: p.dataset.percent ? Number(p.dataset.percent) : null
       };
-      tg.HapticFeedback.impactOccurred('medium');
-      tg.sendData(JSON.stringify(payload)); // bot receives message.web_app_data.data
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      if (tg?.sendData) {
+        tg.sendData(JSON.stringify(payload));
+      } else {
+        // Fallback for testing in a normal browser:
+        alert(Pad: ${payload.action} ${payload.percent ?? ''});
+      }
     });
   });
 
-  // LCD: live XRP price & approximate balances (from /status would be ideal, but we can show price locally)
-  const lcd = document.getElementById('lcd');
+  // LCD: live XRP price (public KuCoin endpoint)
+  const left  = document.getElementById('lcd-left');
   const right = document.getElementById('lcd-right');
 
   async function refreshLCD(){
@@ -102,11 +219,10 @@
       const r = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=XRP-USDT', {cache:'no-store'});
       const j = await r.json();
       const price = Number(j?.data?.price || 0).toFixed(5);
-      lcd.firstElementChild.textContent = XRP/USDT ${price};
-      const d = new Date();
-      right.textContent = d.toLocaleTimeString();
+      left.textContent  = XRP/USDT ${price};
+      right.textContent = new Date().toLocaleTimeString();
     }catch(e){
-      lcd.firstElementChild.textContent = 'Price: N/A';
+      left.textContent  = 'Price: N/A';
       right.textContent = '';
     }
   }
