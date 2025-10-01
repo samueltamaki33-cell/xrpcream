@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>XRP Cream MPC Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0; background: #0e3b5a; font-family: system-ui, sans-serif; color: #eee;
+      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+    }
+    .mpc {
+      width: min(930px, 95vw); background:#cfcfcf; border-radius: 14px; padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      border: 4px solid #777;
+    }
+    .top-row { display:flex; align-items:center; gap:18px; }
+    .lcd {
+      flex: 1; background:#1a2a2e; color:#9de06b; font-family: "Courier New", monospace;
+      border-radius: 6px; padding: 14px 16px; font-size: clamp(14px, 2.2vw, 18px);
+      box-shadow: inset 0 0 0 2px #101a1d;
+      min-height: 48px; display:flex; align-items:center; justify-content: space-between;
+    }
+    .brand { font-weight:700; color:#b21e2b; letter-spacing:.5px; }
+    .grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px;
+    }
+    .pad {
+      aspect-ratio: 1/1; border-radius: 10px; display:flex; align-items:center; justify-content:center;
+      font-weight: 700; text-align:center; cursor: pointer; user-select:none; color:#092032;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.25);
+      transition: transform .05s ease, filter .05s ease;
+    }
+    .pad:active { transform: translateY(2px); filter: brightness(.95); }
+    /* pad colors */
+    .green{ background:#7ef2b6; } .red{ background:#ff8a8a; }
+    .blue{ background:#7ec8ff; } .yellow{ background:#ffe58a; }
+    .grey{ background:#d8d8d8; }
+    .footer { margin-top:12px; font-size:12px; color:#333; text-align:right;}
+  </style>
+</head>
+<body>
+<div class="mpc">
+  <div class="top-row">
+    <div class="brand">AKAI <span style="color:#333;font-weight:600">MPC2000XL</span> • XRP Cream</div>
+  </div>
+  <div id="lcd" class="lcd">
+    <div>Loading…</div>
+    <div id="lcd-right"></div>
+  </div>
+
+  <!-- 4×4 pad grid -->
+  <div class="grid" id="pads">
+    <!-- Row 1 -->
+    <div class="pad green"  data-action="buy"  data-percent="25">Buy 25%</div>
+    <div class="pad green"  data-action="buy"  data-percent="50">Buy 50%</div>
+    <div class="pad green"  data-action="buy"  data-percent="75">Buy 75%</div>
+    <div class="pad green"  data-action="buy"  data-percent="100">Buy 100%</div>
+    <!-- Row 2 -->
+    <div class="pad red"    data-action="sell" data-percent="25">Sell 25%</div>
+    <div class="pad red"    data-action="sell" data-percent="50">Sell 50%</div>
+    <div class="pad red"    data-action="sell" data-percent="75">Sell 75%</div>
+    <div class="pad red"    data-action="sell" data-percent="100">Sell 100%</div>
+    <!-- Row 3 -->
+    <div class="pad blue"   data-action="status">Status</div>
+    <div class="pad blue"   data-action="balance">Balances</div>
+    <div class="pad blue"   data-action="open_orders">Open Orders</div>
+    <div class="pad blue"   data-action="last_trade">Last Trade</div>
+    <!-- Row 4 -->
+    <div class="pad yellow" data-action="live_on">Live ON</div>
+    <div class="pad grey"   data-action="live_off">Live OFF</div>
+    <div class="pad yellow" data-action="bank">Bank Profit</div>
+    <div class="pad grey"   data-action="help">Help</div>
+  </div>
+
+  <div class="footer">Pads send actions to the bot; LCD uses KuCoin public ticker.</div>
+</div>
+
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  // Hook up pad clicks -> sendData to bot
+  document.querySelectorAll('.pad').forEach(p => {
+    p.addEventListener('click', () => {
+      const payload = {
+        action: p.dataset.action,
+        percent: p.dataset.percent ? Number(p.dataset.percent) : null
+      };
+      tg.HapticFeedback.impactOccurred('medium');
+      tg.sendData(JSON.stringify(payload)); // bot receives message.web_app_data.data
+    });
+  });
+
+  // LCD: live XRP price & approximate balances (from /status would be ideal, but we can show price locally)
+  const lcd = document.getElementById('lcd');
+  const right = document.getElementById('lcd-right');
+
+  async function refreshLCD(){
+    try{
+      const r = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=XRP-USDT', {cache:'no-store'});
+      const j = await r.json();
+      const price = Number(j?.data?.price || 0).toFixed(5);
+      lcd.firstElementChild.textContent = XRP/USDT ${price};
+      const d = new Date();
+      right.textContent = d.toLocaleTimeString();
+    }catch(e){
+      lcd.firstElementChild.textContent = 'Price: N/A';
+      right.textContent = '';
+    }
+  }
+  refreshLCD();
+  setInterval(refreshLCD, 5000);
+</script>
+</body>
+</html>
