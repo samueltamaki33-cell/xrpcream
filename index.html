@@ -7,106 +7,56 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root{
-      --mpc-body:#d0cec9;
-      --mpc-panel:#c6c4bf;
-      --mpc-bezel:#6f6f6f;
-      --lcd-bg:#1a2a2e;
-      --lcd-text:#9de06b;
-      --pad:#8d8b88;
-      --label:#2d2d2d;
+      --mpc-body:#d0cec9; --mpc-panel:#c6c4bf; --mpc-bezel:#6f6f6f;
+      --lcd-bg:#1a2a2e; --lcd-text:#9de06b; --pad:#8d8b88;
       --red:#e24a4a; --blue:#6aa8ff; --green:#7ef2b6; --yellow:#ffe58a; --grey:#dddddd;
     }
     *{box-sizing:border-box}
     body{
-      margin:0; background:#0e3b5a; font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin:0; background:#0e3b5a; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       color:#111; display:flex; justify-content:center; align-items:center; min-height:100svh; padding:2.5vmin;
     }
     .mpc{
-      width:min(1040px, 96vw);
-      background:var(--mpc-body);
-      border:6px solid var(--mpc-bezel);
-      border-radius:14px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-      padding:18px 18px 22px;
-      position:relative;
+      width:min(1040px, 96vw); background:var(--mpc-body); border:6px solid var(--mpc-bezel);
+      border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.35); padding:18px 18px 22px; position:relative;
+      transform-origin:center center;
     }
-    /* top header */
-    .header{
-      display:flex; align-items:flex-end; gap:18px; margin-bottom:12px;
-    }
-    .floppy{
-      width:240px; height:86px; background:#2b2b2b; border-radius:6px; position:relative;
-      box-shadow: inset 0 0 0 3px #141414;
-    }
-    .floppy::after{
-      content:""; position:absolute; left:16px; right:16px; top:18px; height:38px; background:#7ab2c1; border-radius:4px;
-      box-shadow: inset 0 0 0 2px #29454d;
-    }
-    .branding{
-      flex:1; display:flex; justify-content:space-between; align-items:flex-end; padding:0 6px;
-    }
+    @media (max-width: 860px) and (orientation: landscape){ .mpc{ transform: scale(.92); } }
+    @media (max-width: 740px) and (orientation: landscape){ .mpc{ transform: scale(.84); } }
+
+    .header{ display:flex; align-items:flex-end; gap:18px; margin-bottom:12px; }
+    .floppy{ width:240px; height:86px; background:#2b2b2b; border-radius:6px; position:relative; box-shadow: inset 0 0 0 3px #141414; }
+    .floppy::after{ content:""; position:absolute; left:16px; right:16px; top:18px; height:38px; background:#7ab2c1; border-radius:4px; box-shadow: inset 0 0 0 2px #29454d; }
+    .branding{ flex:1; display:flex; justify-content:space-between; align-items:flex-end; padding:0 6px; }
     .akai{font-weight:900; color:#bf1622; letter-spacing:.5px; font-size:22px}
     .model{font-weight:800; color:#222; font-size:22px}
     .subtitle{font-size:12px; color:#444}
 
-    .main{
-      display:grid; grid-template-columns: 1.05fr .95fr; gap:18px;
-    }
-
-    /* left control area (fake knobs/buttons) */
-    .left{
-      background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae;
-    }
+    .main{ display:grid; grid-template-columns: 1.05fr .95fr; gap:18px; }
+    .left{ background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae; }
     .lcd{
       background:var(--lcd-bg); color:var(--lcd-text); font-family:"Courier New", ui-monospace, monospace;
       border-radius:6px; padding:12px 14px; font-size:clamp(14px,2.1vw,18px);
       display:flex; align-items:center; justify-content:space-between;
-      box-shadow: inset 0 0 0 2px #101a1d, inset 0 -3px 0 rgba(0,0,0,.5);
-      min-height:52px;
+      box-shadow: inset 0 0 0 2px #101a1d, inset 0 -3px 0 rgba(0,0,0,.5); min-height:52px;
     }
-    .knobs{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px;
-    }
-    .knob{
-      height:64px; background:#2d2d2d; border-radius:50%; position:relative;
-      box-shadow: inset 0 -6px 0 rgba(0,0,0,.35), 0 6px 10px rgba(0,0,0,.2);
-    }
-    .knob::after{
-      content:""; position:absolute; width:6px; height:14px; background:#c9c9c9; top:8px; left:50%; transform:translateX(-50%);
-      border-radius:2px;
-    }
-    .button-row{
-      display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:12px;
-    }
-    .btn{
-      height:28px; background:#e8e8e8; border-radius:4px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.12);
-    }
+    .knobs{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:12px; }
+    .knob{ height:64px; background:#2d2d2d; border-radius:50%; position:relative; box-shadow: inset 0 -6px 0 rgba(0,0,0,.35), 0 6px 10px rgba(0,0,0,.2); }
+    .knob::after{ content:""; position:absolute; width:6px; height:14px; background:#c9c9c9; top:8px; left:50%; transform:translateX(-50%); border-radius:2px; }
+    .button-row{ display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:12px; }
+    .btn{ height:28px; background:#e8e8e8; border-radius:4px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15), 0 2px 6px rgba(0,0,0,.12); }
     .faders{ margin-top:14px; display:grid; grid-template-columns:repeat(2,1fr); gap:18px;}
-    .fader{
-      height:82px; background:#bfbfbf; border-radius:6px; box-shadow:inset 0 0 0 2px #a2a2a2; position:relative;
-    }
-    .fader > span{
-      position:absolute; left:50%; transform:translateX(-50%); width:58%; height:18px; top:46%;
-      background:#2c2c2c; border-radius:4px; box-shadow:0 3px 6px rgba(0,0,0,.25);
-    }
+    .fader{ height:82px; background:#bfbfbf; border-radius:6px; box-shadow:inset 0 0 0 2px #a2a2a2; position:relative; }
+    .fader>span{ position:absolute; left:50%; transform:translateX(-50%); width:58%; height:18px; top:46%; background:#2c2c2c; border-radius:4px; box-shadow:0 3px 6px rgba(0,0,0,.25); }
 
-    /* right pad grid area */
-    .right{
-      background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae;
-      display:flex; flex-direction:column; gap:12px;
-    }
-    .right-title{
-      display:flex; gap:10px; align-items:center; color:#333; font-weight:700; letter-spacing:.4px;
-    }
-    .grid{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
-    }
+    .right{ background:var(--mpc-panel); border-radius:10px; padding:14px; box-shadow:inset 0 0 0 2px #b5b3ae; display:flex; flex-direction:column; gap:12px; }
+    .right-title{ display:flex; gap:10px; align-items:center; color:#333; font-weight:700; letter-spacing:.4px; }
+    .grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
     .pad{
       aspect-ratio:1/1; border-radius:10px; display:flex; align-items:center; justify-content:center;
       font-weight:800; text-align:center; cursor:pointer; user-select:none; color:#08202d;
       box-shadow: inset 0 -5px 0 rgba(0,0,0,.25), 0 9px 18px rgba(0,0,0,.25);
-      transition: transform .05s ease, filter .05s ease;
-      background:var(--pad);
+      transition: transform .05s ease, filter .05s ease; background:var(--pad);
     }
     .pad:active{ transform:translateY(2px); filter:brightness(.95); }
     .green{ background:var(--green); }
@@ -115,12 +65,21 @@
     .yellow{ background:var(--yellow); }
     .grey{ background:var(--grey); }
 
-    .footer{
-      margin-top:10px; font-size:12px; color:#3b3b3b; text-align:right;
+    /* rotate hint overlay (optional) */
+    #rotate-hint{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background:rgba(14,59,90,.9); color:#fff; font:600 16px system-ui,sans-serif; z-index:9999; text-align:center; padding:24px;
     }
   </style>
 </head>
 <body>
+  <div id="rotate-hint">
+    <div>
+      <div style="font-size:48px; margin-bottom:12px;">🔁</div>
+      For the full MPC layout, rotate your phone to <b>landscape</b>.
+    </div>
+  </div>
+
   <div class="mpc">
     <div class="header">
       <div class="floppy"></div>
@@ -129,14 +88,12 @@
           <div class="akai">AKAI professional</div>
           <div class="subtitle">MIDI PRODUCTION CENTER</div>
         </div>
-        <div>
-          <div class="model">MPC2000XL</div>
-        </div>
+        <div><div class="model">MPC2000XL</div></div>
       </div>
     </div>
 
     <div class="main">
-      <!-- LEFT: LCD + faux controls -->
+      <!-- LEFT -->
       <div class="left">
         <div class="lcd">
           <div id="lcd-left">Booting XRP Cream…</div>
@@ -183,37 +140,38 @@
           <div class="pad yellow" data-action="bank">Bank Profit</div>
           <div class="pad grey"   data-action="help">Help</div>
         </div>
-        <div class="footer">Pads send actions to your bot • LCD shows live XRP/USDT.</div>
       </div>
     </div>
   </div>
 
 <script>
-  // Enable Telegram WebApp features if opened from /panel
+  // Telegram bridge (works when opened via /panel). In a normal browser, we fall back to alerts.
   const tg = window.Telegram?.WebApp;
   if (tg) tg.expand();
 
-  // Send pad events to the bot (via WebApp sendData)
+  function sendAction(action, percent = null) {
+    const payload = { action, percent };
+    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    if (tg?.sendData) {
+      tg.sendData(JSON.stringify(payload));     // Bot receives message.web_app_data.data
+    } else {
+      alert(Pad: ${action} ${percent ?? ""}); // Fallback when testing locally
+      console.log("Payload to bot:", payload);
+    }
+  }
+
+  // Wire pads
   document.querySelectorAll('.pad').forEach(p => {
     p.addEventListener('click', () => {
-      const payload = {
-        action: p.dataset.action,
-        percent: p.dataset.percent ? Number(p.dataset.percent) : null
-      };
-      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-      if (tg?.sendData) {
-        tg.sendData(JSON.stringify(payload));
-      } else {
-        // Fallback for testing in a normal browser:
-        alert(Pad: ${payload.action} ${payload.percent ?? ''});
-      }
+      const action  = p.dataset.action;
+      const percent = p.dataset.percent ? Number(p.dataset.percent) : null;
+      sendAction(action, percent);
     });
   });
 
-  // LCD: live XRP price (public KuCoin endpoint)
+  // LCD live price
   const left  = document.getElementById('lcd-left');
   const right = document.getElementById('lcd-right');
-
   async function refreshLCD(){
     try{
       const r = await fetch('https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=XRP-USDT', {cache:'no-store'});
@@ -226,8 +184,16 @@
       right.textContent = '';
     }
   }
-  refreshLCD();
-  setInterval(refreshLCD, 5000);
+  refreshLCD(); setInterval(refreshLCD, 5000);
+
+  // Rotate hint
+  function checkOrientation(){
+    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    document.getElementById('rotate-hint').style.display = isPortrait ? 'flex' : 'none';
+  }
+  checkOrientation();
+  window.addEventListener('orientationchange', checkOrientation);
+  window.addEventListener('resize', checkOrientation);
 </script>
 </body>
 </html>
